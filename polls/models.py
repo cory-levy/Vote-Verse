@@ -19,11 +19,19 @@ class School(models.Model):
 class VoteUser(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
     date_of_birth = models.DateField(blank=True, null=True)
-    school = models.ForeignKey(School, on_delete=models.CASCADE, null=True, blank=True)
+    school = models.ForeignKey(School, on_delete=models.SET_NULL, null=True, blank=True)
 
     REQUIRED_FIELDS = ["email", "date_of_birth"]
 
     objects = VoteUserManager()
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    show_name = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return self.user.username
 
 
 class Choice(models.Model):
@@ -62,6 +70,12 @@ class Vote(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = (
+            "question",
+            "user",
+        )
 
     def __str__(self) -> str:
         return f"{self.question.name} - {self.choice.name}"
