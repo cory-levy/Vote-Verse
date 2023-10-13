@@ -1,10 +1,18 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from oauth2_provider.contrib.rest_framework import TokenHasScope, TokenHasReadWriteScope
 
-from .serializers import RegisterSerializer, ChangePasswordSerializer, ProfileSerializer
-from .models import VoteUser, Profile
+from .models import Choice, Profile, Question, School, Vote, VoteUser
+from .serializers import (
+    ChangePasswordSerializer,
+    ChoiceSerializer,
+    ProfileSerializer,
+    QuestionSerializer,
+    RegisterSerializer,
+    SchoolSerializer,
+    VoteSerializer,
+)
 
 # Create your views here.
 
@@ -21,22 +29,84 @@ class ChangePasswordView(generics.UpdateAPIView):
     queryset = VoteUser.objects.all()
     permission_classes = [
         IsAuthenticated,
-        TokenHasScope,
+        TokenHasReadWriteScope,
     ]
-    required_scopes = ["write"]
     serializer_class = ChangePasswordSerializer
-    
+
 
 class RetrieveProfileView(generics.RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
     serializer_class = ProfileSerializer
-    
-    def get_object(self):
-        pk = self.kwargs['pk']
-        queryset = self.get_queryset()
-        
-        obj = get_object_or_404(queryset, pk=pk)
-        
-        return obj
-    
+
+
+class ListVoteView(generics.ListAPIView):
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class RetrieveVoteView(generics.RetrieveAPIView):
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class ListChoiceView(generics.ListAPIView):
+    queryset = Choice.objects.all()
+    serializer_class = ChoiceSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class RetrieveChoiceView(generics.RetrieveAPIView):
+    queryset = Choice.objects.all()
+    serializer_class = ChoiceSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class ListQuestionView(generics.ListAPIView):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class RetrieveQuestionView(generics.RetrieveAPIView):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class CreateQuesitonView(generics.CreateAPIView):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class CreateChoiceView(generics.CreateAPIView):
+    queryset = Choice.objects.all()
+    serializer_class = ChoiceSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class CreateVoteView(generics.CreateAPIView):
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class ListSchoolView(generics.ListAPIView):
+    queryset = School.objects.all()
+    serializer_class = SchoolSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class RetrieveSchoolView(generics.RetrieveAPIView):
+    queryset = School.objects.all()
+    serializer_class = SchoolSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+
+class CreateSchoolView(generics.CreateAPIView):
+    queryset = School.objects.all()
+    serializer_class = SchoolSerializer
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
