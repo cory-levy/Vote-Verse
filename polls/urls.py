@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
 
 from .views import (
     RegisterView,
@@ -16,9 +17,14 @@ from .views import (
     CreateSchoolView,
     ListSchoolView,
     RetrieveSchoolView,
+    FriendViewSet,
 )
 
+router = routers.DefaultRouter()
+router.register(r"friends", FriendViewSet, "friend")
+
 urlpatterns = [
+    path("", include(router.urls)),
     path("register/", RegisterView.as_view(), name="auth_register"),
     path("password/change/", ChangePasswordView.as_view(), name="change-password"),
     path("profile/<int:pk>/", RetrieveProfileView.as_view(), name="get-profile"),

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import get_user_model
+from friendship.models import FriendshipRequest
 
 from .models import VoteUser, School, Question, Vote, Choice, Profile
 
@@ -163,3 +165,40 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class FriendSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ["id", "username", "email"]
+
+
+class FriendshipRequestSerializer(serializers.ModelSerializer):
+    to_user = serializers.CharField()
+    from_user = serializers.StringRelatedField()
+
+    class Meta:
+        model = FriendshipRequest
+        fields = (
+            "id",
+            "from_user",
+            "to_user",
+            "message",
+            "created",
+            "rejected",
+            "viewed",
+        )
+        extra_kwargs = {
+            "from_user": {"read_only": True},
+            "created": {"read_only": True},
+            "rejected": {"read_only": True},
+            "viewed": {"read_only": True},
+        }
+
+
+class FriendshipRequestResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FriendshipRequest
+        fields = [
+            "id",
+        ]

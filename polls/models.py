@@ -20,6 +20,7 @@ class VoteUser(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
     date_of_birth = models.DateField(blank=True, null=True)
     school = models.ForeignKey(School, on_delete=models.SET_NULL, null=True, blank=True)
+    otp = models.CharField(max_length=6, null=True, blank=True)
 
     REQUIRED_FIELDS = ["email", "date_of_birth"]
 
