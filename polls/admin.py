@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import VoteUser, School, Question, Vote, Choice, Profile
+from .models import VoteUser, School, Question, Vote, Choice, Profile, Gender
 
 
 class VoteUserAdmin(UserAdmin):
@@ -65,3 +65,4 @@ admin.site.register(Question)
 admin.site.register(Vote)
 admin.site.register(Choice)
 admin.site.register(Profile)
+admin.site.register(Gender)

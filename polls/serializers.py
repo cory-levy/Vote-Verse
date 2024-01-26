@@ -3,8 +3,9 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
 from friendship.models import FriendshipRequest
+from drf_writable_nested.serializers import WritableNestedModelSerializer
 
-from .models import VoteUser, School, Question, Vote, Choice, Profile
+from .models import VoteUser, School, Question, Vote, Choice, Profile, Gender
 
 
 class SchoolSerializer(serializers.ModelSerializer):
@@ -13,7 +14,7 @@ class SchoolSerializer(serializers.ModelSerializer):
         fields = ["id", "name"]
 
 
-class VoteUserSerializer(serializers.ModelSerializer):
+class VoteUserSerializer(WritableNestedModelSerializer):
     school = SchoolSerializer()
 
     class Meta:
@@ -29,32 +30,40 @@ class VoteUserSerializer(serializers.ModelSerializer):
         ]
 
 
+class GenderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gender
+        fields = ["id", "gender", "emoji"]
+
+
 class ProfileSerializer(serializers.ModelSerializer):
-    user = VoteUserSerializer()
+    user = VoteUserSerializer(read_only=True)
+    gender = GenderSerializer()
 
     class Meta:
         model = Profile
-        fields = ["id", "user", "show_name"]
+        fields = ["id", "user", "gender", "image", "show_name"]
 
 
-class ChoiceSerializer(serializers.ModelSerializer):
+class ChoiceSerializer(WritableNestedModelSerializer):
     class Meta:
         model = Choice
         fields = ["id", "name"]
 
 
-class QuestionSerializer(serializers.ModelSerializer):
+class QuestionSerializer(WritableNestedModelSerializer):
     choices = ChoiceSerializer(many=True)
+    creator = VoteUserSerializer(read_only=True)
 
     class Meta:
         model = Question
-        fields = ["id", "name", "description", "choices", "created"]
+        fields = ["id", "name", "description", "choices", "created", "creator", "show_creator"]
 
 
-class VoteSerializer(serializers.ModelSerializer):
+class VoteSerializer(WritableNestedModelSerializer):
     question = QuestionSerializer()
     choice = ChoiceSerializer()
-    user = VoteUserSerializer()
+    user = VoteUserSerializer(read_only=True)
 
     class Meta:
         model = Vote

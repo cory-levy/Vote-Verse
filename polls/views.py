@@ -12,7 +12,7 @@ from rest_framework.decorators import action
 from friendship.models import FriendshipRequest, Friend
 from friendship.exceptions import AlreadyExistsError, AlreadyFriendsError
 
-from .models import Choice, Profile, Question, School, Vote, VoteUser
+from .models import Choice, Profile, Question, School, Vote, VoteUser, Gender
 from .serializers import (
     ChangePasswordSerializer,
     ChoiceSerializer,
@@ -24,6 +24,7 @@ from .serializers import (
     FriendSerializer,
     FriendshipRequestSerializer,
     FriendshipRequestResponseSerializer,
+    GenderSerializer,
 )
 from .utils import generate_otp, send_otp_email
 
@@ -52,6 +53,24 @@ class RetrieveProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
     serializer_class = ProfileSerializer
 
+    def get_object(self):
+        return get_object_or_404(self.queryset, user=self.request.user)
+
+
+class RetrieveUserProfileView(generics.RetrieveUpdateAPIView):
+    queryset = Profile.objects.all()
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+    serializer_class = ProfileSerializer
+
+    def get_object(self):
+        return get_object_or_404(self.queryset, user__pk=self.kwargs["pk"])
+
+
+class ListGenderView(generics.ListAPIView):
+    queryset = Gender.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = GenderSerializer
+
 
 class ListVoteView(generics.ListAPIView):
     queryset = Vote.objects.all()
@@ -63,6 +82,13 @@ class RetrieveVoteView(generics.RetrieveAPIView):
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
     permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+
+    def get_object(self):
+        queryset = self.queryset
+        user = self.request.user
+        question_id = self.kwargs["pk"]
+
+        return get_object_or_404(queryset, user=user, question__pk=question_id)
 
 
 class ListChoiceView(generics.ListAPIView):
@@ -94,6 +120,9 @@ class CreateQuesitonView(generics.CreateAPIView):
     serializer_class = QuestionSerializer
     permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
 
+    def perform_create(self, serializer):
+        serializer.save(creator=self.request.user)
+
 
 class CreateChoiceView(generics.CreateAPIView):
     queryset = Choice.objects.all()
@@ -106,17 +135,24 @@ class CreateVoteView(generics.CreateAPIView):
     serializer_class = VoteSerializer
     permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 class ListSchoolView(generics.ListAPIView):
     queryset = School.objects.all()
     serializer_class = SchoolSerializer
-    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+    permission_classes = [
+        AllowAny,
+    ]
 
 
 class RetrieveSchoolView(generics.RetrieveAPIView):
     queryset = School.objects.all()
     serializer_class = SchoolSerializer
-    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+    permission_classes = [
+        AllowAny,
+    ]
 
 
 class CreateSchoolView(generics.CreateAPIView):

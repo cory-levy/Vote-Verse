@@ -27,8 +27,18 @@ class VoteUser(AbstractUser):
     objects = VoteUserManager()
 
 
+class Gender(models.Model):
+    gender = models.CharField(max_length=20)
+    emoji = models.CharField(max_length=20)
+
+    def __str__(self) -> str:
+        return self.gender
+
+
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    gender = models.ForeignKey(Gender, on_delete=models.SET_NULL, null=True, blank=True)
+    image = models.ImageField(upload_to="profile_images", null=True, blank=True)
     show_name = models.BooleanField(default=True)
 
     def __str__(self) -> str:
@@ -46,8 +56,15 @@ class Choice(models.Model):
 
 class Question(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     choices = models.ManyToManyField(Choice, related_name="related_polls", blank=True)
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    show_creator = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
